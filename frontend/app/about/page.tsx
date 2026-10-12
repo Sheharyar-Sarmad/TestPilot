@@ -1,3 +1,4 @@
+// frontend/app/about/page.tsx
 import HeroSectionAbout from "@/components/layout/HeroSectionAbout";
 import ProblemSection from "@/components/layout/ProblemSection";
 import WorkflowSection from "@/components/layout/WorkflowSection";
@@ -9,23 +10,15 @@ import DeveloperSection from "@/components/layout/DeveloperSection";
 import PrivacySection from "@/components/layout/PrivacySection";
 import type { Metadata } from "next";
 
-// Add this metadata export to override the default layout metadata
 export const metadata: Metadata = {
-  title: "About", // This will be used as "About · TestPilot AI" due to the template in layout.tsx
+  title: "About",
   description: "Learn about the architecture, agentic workflow, and engineering behind TestPilot AI.",
   openGraph: {
     title: "About TestPilot AI — System Architecture",
     description: "Deep dive into the multi-agent LangGraph workflow and distributed system architecture.",
-    url: "https://testpilot.ai/about", // Replace with your actual domain
+    url: "https://testpilot.ai/about",
     siteName: "TestPilot AI",
-    images: [
-      {
-        url: "/og-about.png",
-        width: 1200,
-        height: 630,
-        alt: "About TestPilot AI - System Architecture",
-      },
-    ],
+    images: [{ url: "/og-about.png", width: 1200, height: 630, alt: "About TestPilot AI - System Architecture" }],
     locale: "en_US",
     type: "website",
   },
@@ -40,10 +33,12 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <main className="relative z-10 min-h-screen overflow-x-clip">
-      {/* Hero goes full-bleed. It manages its own top spacing. */}
-      <HeroSectionAbout />
+      {/* Hero now shares the same container as the rest */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <HeroSectionAbout />
+      </div>
 
-      {/* All other sections get the standard spacing. */}
+      {/* Remaining sections */}
       <div className="mx-auto max-w-7xl space-y-28 px-4 pb-28 sm:px-6 lg:px-8">
         <ProblemSection />
         <WorkflowSection />

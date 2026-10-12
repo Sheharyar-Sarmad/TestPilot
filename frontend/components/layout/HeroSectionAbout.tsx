@@ -25,7 +25,7 @@ const TYPED = LINES.map((line) => {
 
 export default function HeroSectionAbout() {
   return (
-    <section className="relative grid items-center gap-12 pt-24 pb-12 lg:grid-cols-2">
+    <section className="relative grid items-center gap-12 pt-20 pb-12 lg:grid-cols-2">
       {" "}
       <div>
         <span className="inline-block border-4 border-foreground bg-background/70 px-3 py-1 font-mono text-xs uppercase tracking-widest text-brand shadow-[6px_6px_0px_0px_var(--brand)] backdrop-blur-xl">
