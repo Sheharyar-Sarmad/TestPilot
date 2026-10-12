@@ -108,8 +108,8 @@ docker run --rm --name testpilot-redis -p 6379:6379 redis:7-alpine
 
 ## 🌐 Deployment
 
-- **Live Frontend:** [Link]
-- **Live API:** [Link]
+- **Live Frontend:** [https://testpilot-chi.vercel.app]
+- **Live API:** [https://testpilot-9bs7.onrender.com]
 
 ---
 

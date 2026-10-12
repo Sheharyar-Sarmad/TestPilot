@@ -53,7 +53,7 @@ export function PreviewSection() {
           <span className="w-3 h-3 rounded-full bg-green-400 border border-black dark:border-white" />
           <div className="ml-4 flex-1 max-w-md px-3 py-1 rounded-md bg-white dark:bg-zinc-900 border-2 border-black dark:border-white">
             <span className="text-[11px] text-black dark:text-white font-mono font-bold">
-              testpilot.ai/fix/abc123/result
+              testpilot-chi.vercel.app/fix/abc123/result
             </span>
           </div>
         </div>

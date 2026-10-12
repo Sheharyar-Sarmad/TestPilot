@@ -76,4 +76,4 @@ Open `http://localhost:3000` in your browser.
 
 ## Deployment
 
-Live App Deployment Link: [Insert Link Here]
+Live App Deployment Link: [https://testpilot-chi.vercel.app]
