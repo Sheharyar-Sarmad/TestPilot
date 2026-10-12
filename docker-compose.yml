@@ -1,0 +1,27 @@
+# TestPilot/docker-compose.yml
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend  # Matches your current backend file
+    container_name: testpilot-backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend # Matches the frontend file you will create
+    container_name: testpilot-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped

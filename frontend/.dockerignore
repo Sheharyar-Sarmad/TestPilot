@@ -1,0 +1,28 @@
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Secrets — never bake .env into the image
+.env
+.env.*
+!.env.example
+
+# Git and IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Logs and temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+tmp/
+
+# Docker files (don't copy these into the image)
+Dockerfile*
+docker-compose*.yml

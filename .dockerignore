@@ -1,0 +1,38 @@
+# Virtual environments
+**/.venv
+**/venv
+**/env
+
+# Python bytecode and caches
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+
+# Secrets — never bake .env into the image
+**/.env
+**/.env.*
+!**/.env.example
+
+# Git and IDE
+**/.git
+**/.gitignore
+**/.vscode
+**/.idea
+
+# Node / frontend
+**/node_modules
+**/.next
+**/out
+**/dist
+
+# Logs and temp
+**/*.log
+**/tmp
+
+# Docker files
+**/Dockerfile*
+**/docker-compose*.yml

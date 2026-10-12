@@ -1,0 +1,110 @@
+# ==========================================
+# PYTHON BYTECODE & CACHE
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ==========================================
+# VIRTUAL ENVIRONMENTS
+# ==========================================
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ==========================================
+# ENVIRONMENT VARIABLES (CRITICAL)
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Do NOT ignore the example file so others know what keys are needed
+!.env.example
+
+# ==========================================
+# BUILD ARTIFACTS & DISTRIBUTIONS
+# ==========================================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ==========================================
+# TESTING & COVERAGE
+# ==========================================
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# ==========================================
+# LINTERS & TYPE CHECKERS
+# ==========================================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# ==========================================
+# PACKAGE MANAGERS (UV / PDM)
+# ==========================================
+# Ignore the local cache, but KEEP pyproject.toml and uv.lock tracked!
+.uv/
+.pdm-python
+.pdm-build/
+
+# ==========================================
+# IDE & EDITOR FILES
+# ==========================================
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+
+# ==========================================
+# OS GENERATED FILES
+# ==========================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ==========================================
+# LOGS
+# ==========================================
+*.log
+logs/

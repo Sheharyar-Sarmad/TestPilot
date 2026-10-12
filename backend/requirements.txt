@@ -1,0 +1,40 @@
+# API Server
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Validation and Configuration
+pydantic
+pydantic-settings
+python-dotenv
+
+# AI and Agent Orchestration
+langchain
+langchain-core
+langchain-groq
+langchain-community
+langgraph
+
+# HTTP Client and GitHub File Fetching
+httpx
+
+# Code Parsing and Analysis
+tree-sitter
+tree-sitter-language-pack
+GitPython
+
+# Database and Persistence
+sqlalchemy
+psycopg[binary]
+redis
+
+# Logging
+structlog
+
+# Testing
+pytest
+pytest-asyncio
+
+# Code Quality
+ruff
+mypy
