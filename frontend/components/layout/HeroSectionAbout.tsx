@@ -16,14 +16,17 @@ const LINE_PAUSE = 0.6;
 
 let cursor = 0.6;
 const TYPED = LINES.map((line) => {
-  const chars = line.split("").map((char, i) => ({ char, delay: cursor + i * CHAR_DELAY }));
+  const chars = line
+    .split("")
+    .map((char, i) => ({ char, delay: cursor + i * CHAR_DELAY }));
   cursor += line.length * CHAR_DELAY + LINE_PAUSE;
   return chars;
 });
 
 export default function HeroSectionAbout() {
   return (
-    <section className="relative grid items-center gap-12 py-12 lg:grid-cols-2">
+    <section className="relative grid items-center gap-12 pt-24 pb-12 lg:grid-cols-2">
+      {" "}
       <div>
         <span className="inline-block border-4 border-foreground bg-background/70 px-3 py-1 font-mono text-xs uppercase tracking-widest text-brand shadow-[6px_6px_0px_0px_var(--brand)] backdrop-blur-xl">
           [ OPEN SOURCE PROJECT ]
@@ -34,7 +37,8 @@ export default function HeroSectionAbout() {
         </h1>
 
         <p className="mt-6 max-w-xl font-mono text-base leading-relaxed text-muted-foreground sm:text-lg">
-          TestPilot AI is a multi-agent system that diagnoses, fixes, and verifies code in real-time.
+          TestPilot AI is a multi-agent system that diagnoses, fixes, and
+          verifies code in real-time.
         </p>
 
         <div className="mt-10 flex flex-wrap gap-5">
@@ -54,7 +58,6 @@ export default function HeroSectionAbout() {
           </a>
         </div>
       </div>
-
       <div className="relative">
         <motion.div
           aria-hidden
@@ -76,7 +79,14 @@ export default function HeroSectionAbout() {
 
           <div className="min-h-[200px] space-y-3 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 p-6 font-mono text-sm tracking-wider sm:text-base">
             {TYPED.map((chars, li) => (
-              <p key={li} className={li === TYPED.length - 1 ? "font-bold text-brand" : "text-foreground/90"}>
+              <p
+                key={li}
+                className={
+                  li === TYPED.length - 1
+                    ? "font-bold text-brand"
+                    : "text-foreground/90"
+                }
+              >
                 {chars.map(({ char, delay }, ci) => (
                   <motion.span
                     key={ci}

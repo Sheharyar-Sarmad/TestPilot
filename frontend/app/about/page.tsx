@@ -39,10 +39,12 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    // No background here, so the global Three.js background stays visible.
-    <main className="relative z-10 min-h-screen">
-      <div className="mx-auto max-w-7xl space-y-28 px-4 pb-28 pt-32 sm:px-6 lg:px-8">
-        <HeroSectionAbout />
+    <main className="relative z-10 min-h-screen overflow-x-clip">
+      {/* Hero goes full-bleed. It manages its own top spacing. */}
+      <HeroSectionAbout />
+
+      {/* All other sections get the standard spacing. */}
+      <div className="mx-auto max-w-7xl space-y-28 px-4 pb-28 sm:px-6 lg:px-8">
         <ProblemSection />
         <WorkflowSection />
         <ArchitectureDiagramSection />

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TestPilot AI — Fix Your Code",
     description: "One file. One fix. Verified. Submit your code for autonomous AI repair and real-time verification.",
-    url: "https://testpilot.ai/fix", // Replace with your actual domain when deployed
+    url: "https://testpilot-chi.vercel.app/fix", // Replace with your actual domain when deployed
     siteName: "TestPilot AI",
     images: [
       {

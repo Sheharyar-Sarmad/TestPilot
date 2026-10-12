@@ -18,7 +18,7 @@ export async function generateMetadata({
     openGraph: {
       title: `TestPilot AI — Repair Result (${shortId})`,
       description: "AI diagnosis, corrected code, diff, and verification results.",
-      url: `https://testpilot.vercel.app/fix/${processid}/result`,
+      url: `https://testpilot-chi.vercel.app/fix/${processid}/result`,
       siteName: "TestPilot AI",
       images: [{ url: "/og-result.png", width: 1200, height: 630, alt: "TestPilot AI - Code Repair Result" }],
       locale: "en_US",

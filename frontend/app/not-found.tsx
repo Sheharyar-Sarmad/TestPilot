@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TestPilot AI — 404 Not Found",
     description: "The route you are trying to access does not exist in the current filesystem.",
-    url: "https://testpilot.vercel.app/404", // Replace with your actual domain
+    url: "https://testpilot-chi.vercel.app/404", // Replace with your actual domain
     siteName: "TestPilot AI",
     images: [
       {

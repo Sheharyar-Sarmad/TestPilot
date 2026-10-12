@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     title: "TestPilot AI — Autonomous Code Repair",
     description:
       "One file. One fix. Verified. AI-powered single-file code debugging and sandbox verification.",
-    url: "https://testpilot.vercel.app.ai",
+    url: "https://testpilot-chi.vercel.app",
     siteName: "TestPilot AI",
     images: [
       {
