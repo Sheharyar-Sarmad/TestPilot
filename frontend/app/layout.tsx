@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Inter, JetBrains_Mono, Geist } from "next/font/google";
 import "./globals.css";
+
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { LenisProvider } from "@/components/providers/LenisProvder";
 import { ThreeBackground } from "@/components/animations/ThreeBackground";
@@ -27,27 +29,33 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  ),
+
   title: {
     default: "TestPilot AI — Single-file code repair & verification",
     template: "%s · TestPilot AI",
   },
+
   description:
     "AI-powered single-file code debugging, repair, and verification. Diagnose root causes, view diffs, and see honestly-reported test results.",
-  // Add your favicon/icons here
+
   icons: {
     icon: "/meta-logo.png",
     shortcut: "/meta-logo.png",
     apple: "/meta-logo.png",
   },
-  // Open Graph metadata for social sharing (LinkedIn, Discord, etc.)
+
   openGraph: {
     title: "TestPilot AI — Autonomous Code Repair",
-    description: "One file. One fix. Verified. AI-powered single-file code debugging and sandbox verification.",
-    url: "https://testpilot.ai", // Replace with your actual domain when deployed
+    description:
+      "One file. One fix. Verified. AI-powered single-file code debugging and sandbox verification.",
+    url: "https://testpilot.vercel.app.ai",
     siteName: "TestPilot AI",
     images: [
       {
-        url: "/og-home.png", // This file needs to be in your public/ folder
+        url: "/og-home.png",
         width: 1200,
         height: 630,
         alt: "TestPilot AI - Autonomous Code Repair",
@@ -56,7 +64,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
-  // Twitter metadata
+
   twitter: {
     card: "summary_large_image",
     title: "TestPilot AI — Autonomous Code Repair",
@@ -79,10 +87,18 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans text-foreground">
         <ThemeProvider>
           <LenisProvider>
-            <AppLoader />
+            <Suspense fallback={null}>
+              <AppLoader />
+            </Suspense>
+
             <ThreeBackground />
-            <Navbar />
-            <main className="flex-1 relative z-10 pt-24">{children}</main>{" "}
+
+            <Suspense fallback={null}>
+              <Navbar />
+            </Suspense>
+
+            <main className="flex-1 relative z-10 pt-24">{children}</main>
+
             <Footer />
           </LenisProvider>
         </ThemeProvider>

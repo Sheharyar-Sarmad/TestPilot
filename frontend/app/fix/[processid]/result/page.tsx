@@ -2,7 +2,9 @@
 import type { Metadata } from "next";
 import { ResultClient } from "./result-client";
 
-// Use generateMetadata for dynamic routes
+// THE FIX: Opt out of prerendering
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: {
@@ -10,23 +12,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { processid } = await params;
   const shortId = processid ? processid.slice(0, 8) : "Unknown";
-
   return {
-    title: `Result ${shortId}`, // Will render as "Result b1fd5cfb · TestPilot AI"
+    title: `Result ${shortId}`,
     description: "View the AI-generated diagnosis, corrected code, diff, and sandbox verification results.",
     openGraph: {
       title: `TestPilot AI — Repair Result (${shortId})`,
       description: "AI diagnosis, corrected code, diff, and verification results.",
-      url: `https://testpilot.ai/fix/${processid}/result`, // Replace with your actual domain
+      url: `https://testpilot.vercel.app/fix/${processid}/result`,
       siteName: "TestPilot AI",
-      images: [
-        {
-          url: "/og-result.png",
-          width: 1200,
-          height: 630,
-          alt: "TestPilot AI - Code Repair Result",
-        },
-      ],
+      images: [{ url: "/og-result.png", width: 1200, height: 630, alt: "TestPilot AI - Code Repair Result" }],
       locale: "en_US",
       type: "website",
     },
