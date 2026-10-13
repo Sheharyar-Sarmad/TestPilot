@@ -14,6 +14,12 @@ const lerp = THREE.MathUtils.lerp;
 const rad = THREE.MathUtils.degToRad;
 const UP = new THREE.Vector3(0, 1, 0);
 
+/* ================================================================ lightness controls
+   Master knobs: lower = subtler. Tweak these to change the whole look. */
+const WOLF_OPACITY = { dark: 0.5, light: 0.4 }; // whole 3D layer (wolf, moon, snow/embers)
+const GRID_OPACITY = { dark: 0.12, light: 0.16 };
+const TEXT_STROKE = { rows: [6, 10, 7], words: 14 }; // % of brand color in the outline text
+
 /* ================================================================ camera timeline */
 type Key = {
   p: number;
@@ -1090,7 +1096,7 @@ export function ThreeBackground() {
     let darkMode = isDark();
     const applyTheme = () => {
       darkMode = isDark();
-      gridMat.opacity = darkMode ? 0.24 : 0.32;
+      gridMat.opacity = darkMode ? GRID_OPACITY.dark : GRID_OPACITY.light;
       shadow.visible = !darkMode;
       hemi.intensity = darkMode ? 1.1 : 1.6;
       key.intensity = darkMode ? 3.0 : 1.9;
@@ -1147,7 +1153,10 @@ export function ThreeBackground() {
 
       introT = Math.min(1, introT + dt / 0.75);
       const intro = smooth(introT);
-      container.style.opacity = String(intro);
+      // Whole 3D layer is faded here — this is the main "lightness" control.
+      container.style.opacity = String(
+        intro * (darkMode ? WOLF_OPACITY.dark : WOLF_OPACITY.light),
+      );
 
       const total = Math.max(
         1,
@@ -1214,8 +1223,8 @@ export function ThreeBackground() {
         leg.hip.rotation.x = idleWeight * (leg.off === 0 ? 1 : -1);
       }
 
-  //  The wolf never gets smaller than its natural size (scale 1.0), never
-  //  smaller than ~42% of the viewport, and never larger than 70% of it. */
+      /* The wolf never gets smaller than its natural size (scale 1.0), never
+         smaller than ~42% of the viewport, and never larger than 70% of it. */
       const visibleH = 2 * cam.r * Math.tan(rad(cam.fov * 0.5));
       const maxScale = (0.7 * visibleH) / WOLF_HEIGHT;
       const minScale = Math.max(
@@ -1385,10 +1394,12 @@ export function ThreeBackground() {
       haloMat.color.copy(palette.fill);
       gridMat.color.copy(palette.fill);
 
-      // background pulse
+      // background pulse (kept gentle so the grid stays quiet)
       const pulse = 0.5 + 0.5 * Math.sin(t * 0.6);
       gridMat.opacity =
-        (darkMode ? 0.24 : 0.32) + pulse * 0.08 + scrollBurst * 0.12;
+        (darkMode ? GRID_OPACITY.dark : GRID_OPACITY.light) +
+        pulse * 0.03 +
+        scrollBurst * 0.05;
 
       /* ---------- DOM ---------- */
       const W = window.innerWidth;
@@ -1493,7 +1504,7 @@ export function ThreeBackground() {
 
   const stroke = (pct: number) => ({
     color: "transparent",
-    WebkitTextStroke: `2px color-mix(in srgb, var(--brand) ${pct}%, transparent)`,
+    WebkitTextStroke: `1.5px color-mix(in srgb, var(--brand) ${pct}%, transparent)`,
   });
 
   return (
@@ -1515,7 +1526,7 @@ export function ThreeBackground() {
             style={{
               top: ROW_TOP[i],
               fontSize: "clamp(6rem, 15vw, 14rem)",
-              ...stroke(i === 1 ? 26 : 16),
+              ...stroke(TEXT_STROKE.rows[i]),
             }}
           >
             {text}
@@ -1529,7 +1540,10 @@ export function ThreeBackground() {
               wordRefs.current[i] = el;
             }}
             className="absolute inset-0 flex items-center justify-center font-mono font-black uppercase leading-none tracking-widest opacity-0 will-change-transform"
-            style={{ fontSize: "clamp(6rem, 24vw, 22rem)", ...stroke(45) }}
+            style={{
+              fontSize: "clamp(6rem, 24vw, 22rem)",
+              ...stroke(TEXT_STROKE.words),
+            }}
           >
             {w}
           </div>
@@ -1544,12 +1558,12 @@ export function ThreeBackground() {
 
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 -z-30 bg-[radial-gradient(ellipse_at_center,transparent_45%,var(--background)_110%)] opacity-70"
+        className="pointer-events-none fixed inset-0 -z-30 bg-[radial-gradient(ellipse_at_center,transparent_35%,var(--background)_105%)] opacity-80"
       />
 
       <div
         aria-hidden
-        className="pointer-events-none fixed bottom-6 left-6 z-20 hidden border-2 border-foreground bg-background/70 px-3 py-2 font-mono text-[10px] uppercase tracking-widest shadow-[4px_4px_0px_0px_var(--brand)] backdrop-blur-xl sm:block"
+        className="pointer-events-none fixed bottom-6 left-6 z-20 hidden border-2 border-foreground bg-background/90 px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-foreground/80 shadow-[4px_4px_0px_0px_var(--brand)] backdrop-blur-xl sm:block"
       >
         <div ref={hudLabelRef}>{PHASES[0]}</div>
         <div className="mt-2 h-1 w-48 bg-foreground/15">

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Check, X, Minus } from "lucide-react";
+import { motion, type Variants } from "framer-motion";
+import { Check, Minus, X } from "lucide-react";
 
 type CellValue = "yes" | "no" | "partial";
 
@@ -61,115 +61,148 @@ const ROWS: Row[] = [
   },
 ];
 
+/* One column grid shared by the header and every row so they always line up. */
+const GRID = "grid grid-cols-[1fr_84px_84px] sm:grid-cols-[1fr_132px_132px]";
+
+/* The TestPilot column carries the single accent tint. */
+const BRAND_TINT = "bg-[color-mix(in_srgb,var(--brand)_12%,transparent)]";
+
+const ICON_BASE =
+  "inline-flex h-7 w-7 items-center justify-center rounded-full border-2 border-foreground";
+
 function StatusIcon({ value }: { value: CellValue }) {
   if (value === "yes") {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-500/15">
-        <Check className="w-3.5 h-3.5 text-green-500" strokeWidth={3} />
+      <span className={`${ICON_BASE} bg-[var(--brand)] text-black`}>
+        <Check className="h-4 w-4" strokeWidth={3.5} aria-hidden />
+        <span className="sr-only">Yes</span>
       </span>
     );
   }
   if (value === "no") {
     return (
-      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-500/15">
-        <X className="w-3.5 h-3.5 text-red-500" strokeWidth={3} />
+      <span className={`${ICON_BASE} bg-background text-red-500`}>
+        <X className="h-4 w-4" strokeWidth={3.5} aria-hidden />
+        <span className="sr-only">No</span>
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-muted-foreground/15">
-      <Minus className="w-3.5 h-3.5 text-muted-foreground" strokeWidth={3} />
+    <span className={`${ICON_BASE} bg-background text-muted-foreground`}>
+      <Minus className="h-4 w-4" strokeWidth={3.5} aria-hidden />
+      <span className="sr-only">Partially</span>
     </span>
   );
 }
 
+/* Animation runs once, when the section scrolls into view. */
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const card: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: EASE, staggerChildren: 0.05, delayChildren: 0.15 },
+  },
+};
+const rowAnim: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
+};
+
 export function ComparisonSection() {
   return (
-    <section className="max-w-4xl mx-auto px-6 py-24">
+    <section className="mx-auto max-w-4xl px-6 py-24">
       {/* Heading */}
-      <div className="text-center mb-14">
-        <p className="text-xs uppercase tracking-widest text-[var(--brand)] font-medium mb-3">
-          Why not just use a chatbot?
-        </p>
-        <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
-          A chatbot guesses. TestPilot verifies.
-        </h2>
-        <p className="text-muted-foreground max-w-xl mx-auto">
-          A general chatbot can rewrite your code. It cannot run your tests,
-          report honest results, or show you a structured diff. That's the
-          difference.
-        </p>
-      </div>
-
-      {/* Table - Added Brutalist borders and hard shadows while keeping liquid-glass */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        className="mb-14 text-center"
+        initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.5 }}
-        className="rounded-2xl liquid-glass overflow-hidden border-4 border-black dark:border-white shadow-[8px_8px_0px_0px_#000] dark:shadow-[8px_8px_0px_0px_#fff]"
+        transition={{ duration: 0.5, ease: EASE }}
       >
-        {/* Header row - Brutalist high contrast solid background */}
-        <div className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_120px_120px] items-center gap-4 px-5 sm:px-6 py-4 border-b-4 border-black dark:border-white bg-black dark:bg-white">
-          <span className="text-xs font-black text-white/80 dark:text-black/80 uppercase tracking-widest">
+        <p className="mb-3 text-sm font-semibold text-[var(--brand)]">
+          Why not just use a chatbot?
+        </p>
+        <h2
+          className="mb-4 text-3xl font-black uppercase tracking-tight sm:text-5xl"
+          style={{ fontFamily: "var(--font-heading), system-ui, sans-serif" }}
+        >
+          A chatbot guesses. TestPilot verifies.
+        </h2>
+        <p className="mx-auto max-w-xl text-base text-muted-foreground">
+          A general chatbot can rewrite your code. It cannot run your tests, report honest
+          results, or show you a structured diff. That&apos;s the difference.
+        </p>
+      </motion.div>
+
+      {/* Table */}
+      <motion.div
+        variants={card}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        className="overflow-hidden rounded-2xl border-[3px] border-foreground bg-background/90 shadow-[6px_6px_0_0_var(--foreground)] backdrop-blur-md"
+      >
+        {/* Header */}
+        <motion.div
+          variants={rowAnim}
+          className={`${GRID} items-stretch border-b-[3px] border-foreground bg-foreground/[0.05]`}
+        >
+          <span className="flex items-center px-5 py-3.5 text-xs font-bold text-muted-foreground sm:px-6">
             Feature
           </span>
-          <span className="text-xs font-black text-white dark:text-black uppercase tracking-widest text-center">
+          <span className="flex items-center justify-center bg-[var(--brand)] px-2 py-3.5 text-center text-xs font-black uppercase tracking-wide text-black">
             TestPilot
           </span>
-          <span className="text-xs font-black text-white/80 dark:text-black/80 uppercase tracking-widest text-center">
-            Basic Chatbot
+          <span className="flex items-center justify-center px-2 py-3.5 text-center text-xs font-bold leading-tight text-muted-foreground">
+            Basic chatbot
           </span>
-        </div>
+        </motion.div>
 
-        {/* Body rows - Thick brutalist dividers */}
-        <div className="divide-y-4 divide-black dark:divide-white">
-          {ROWS.map(({ feature, testpilot, chatbot, note }, i) => (
+        {/* Rows */}
+        <div className="divide-y divide-foreground/15">
+          {ROWS.map(({ feature, testpilot, chatbot, note }) => (
             <motion.div
               key={feature}
-              initial={{ opacity: 0, x: -10 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.3, delay: i * 0.04 }}
-              // Kept original hover effect exactly as requested
-              className="grid grid-cols-[1fr_auto_auto] sm:grid-cols-[1fr_120px_120px] items-center gap-4 px-5 sm:px-6 py-4 hover:bg-foreground/[0.02] transition-colors"
+              variants={rowAnim}
+              className={`${GRID} items-stretch transition-colors hover:bg-foreground/[0.03]`}
             >
-              <div>
-                <p className="text-sm font-black uppercase tracking-wide text-foreground">
-                  {feature}
-                </p>
+              <div className="px-5 py-4 sm:px-6">
+                <p className="text-sm font-bold text-foreground">{feature}</p>
                 {note && (
-                  <p className="text-xs font-medium text-muted-foreground mt-1.5 leading-relaxed">
-                    {note}
-                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{note}</p>
                 )}
               </div>
-              <div className="flex justify-center">
+              <div className={`flex items-center justify-center ${BRAND_TINT}`}>
                 <StatusIcon value={testpilot} />
               </div>
-              <div className="flex justify-center">
+              <div className="flex items-center justify-center">
                 <StatusIcon value={chatbot} />
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Footer strip - Brutalist high contrast solid background */}
-        <div className="px-5 sm:px-6 py-4 border-t-4 border-black dark:border-white bg-black dark:bg-white flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-xs font-bold uppercase tracking-wider text-white/80 dark:text-black/80">
-            Verification only runs when a check is actually supported for the
-            submitted language.
+        {/* Footer */}
+        <motion.div
+          variants={rowAnim}
+          className="flex flex-wrap items-center justify-between gap-3 border-t-[3px] border-foreground bg-foreground/[0.05] px-5 py-4 sm:px-6"
+        >
+          <p className="text-xs text-muted-foreground">
+            Verification only runs when a check is actually supported for the submitted language.
           </p>
-          <span className="text-xs font-black uppercase tracking-wider text-white dark:text-black">
+          <span className="inline-flex items-center rounded-full border-2 border-foreground bg-[var(--brand)] px-3 py-1 text-xs font-extrabold text-black shadow-[2px_2px_0_0_var(--foreground)]">
             No claims without execution.
           </span>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* Footnote */}
-      <p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mt-8">
-        "Basic Chatbot" refers to general-purpose assistants without code
-        execution or structured verification.
+      <p className="mx-auto mt-8 max-w-xl text-center text-xs text-muted-foreground">
+        &ldquo;Basic chatbot&rdquo; refers to general-purpose assistants without code execution or
+        structured verification.
       </p>
     </section>
   );
