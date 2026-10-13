@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/v1/processes", tags=["processes"])
 settings = get_settings()
 
 
-# ------------------------------------------------------------------ schemas
+# schemas
 
 class CreateProcessRequest(BaseModel):
     source_code: Optional[str] = Field(None, description="Raw source code")
@@ -44,14 +44,14 @@ class CreateProcessResponse(BaseModel):
     stream_url: str
 
 
-# ------------------------------------------------------------------ create
+# create
 
 @router.post("", response_model=CreateProcessResponse, status_code=201)
 async def create_process(
     payload: CreateProcessRequest,
     background: BackgroundTasks,
 ):
-    # ---- resolve source_code (fetch GitHub if needed) ----
+    # resolve source_code (fetch GitHub if needed) 
     source_code = payload.source_code
     filename = payload.filename or "submitted.py"
 
@@ -71,7 +71,7 @@ async def create_process(
             detail=f"Source exceeds {settings.MAX_SOURCE_FILE_BYTES} bytes.",
         )
 
-    # ---- create job ----
+    # create job 
     process_id = uuid.uuid4().hex
     await JobStore.create(process_id, {
         "status": "queued",
@@ -83,7 +83,7 @@ async def create_process(
         "test_code": payload.test_code or "",
     })
 
-    # ---- kick off worker ----
+    # kick off worker 
     background.add_task(run_repair_workflow, process_id)
 
     return CreateProcessResponse(
@@ -93,7 +93,7 @@ async def create_process(
     )
 
 
-# ------------------------------------------------------------------ status
+# status
 
 @router.get("/{process_id}")
 async def get_status(process_id: str):
@@ -108,7 +108,7 @@ async def get_status(process_id: str):
     }
 
 
-# ------------------------------------------------------------------ result
+# result
 
 @router.get("/{process_id}/result")
 async def get_result(process_id: str):
@@ -138,7 +138,7 @@ async def get_result(process_id: str):
     }
 
 
-# ------------------------------------------------------------------ stream
+# stream
 
 @router.get("/{process_id}/stream")
 async def stream_process(process_id: str):
@@ -167,7 +167,7 @@ async def stream_process(process_id: str):
     )
 
 
-# ------------------------------------------------------------------ delete
+# delete
 
 @router.delete("/{process_id}", status_code=204)
 async def delete_process(process_id: str):

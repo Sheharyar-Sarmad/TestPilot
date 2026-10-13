@@ -31,7 +31,6 @@ const Monaco = dynamic(() => import("@monaco-editor/react"), {
   ),
 });
 
-// FIXED: Added "file" to the union type to match the logic below
 type InputMode = "paste" | "upload" | "github";
 
 interface HeroSubmission {
@@ -53,6 +52,22 @@ function detectLanguage(filename: string): string {
   return LANG_MAP[ext] ?? "plaintext";
 }
 
+// ---------------------------------------------------- server wake-up handling
+const SERVER_WAIT_MS = 100_000;
+const SERVER_WAIT_SECONDS = SERVER_WAIT_MS / 1000;
+const RETRY_DELAY_MS = 3_000;
+const TIMEOUT_MARKER = "__TIMEOUT__";
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+// Network failure (status 0 / none) or proxy errors while backend is booting
+function isRetryable(err: unknown): boolean {
+  if (err instanceof ApiError) {
+    return !err.status || [502, 503, 504].includes(err.status);
+  }
+  return true; // plain fetch / network errors
+}
+
 export function FixClient() {
   const router = useRouter();
   const search = useSearchParams();
@@ -69,10 +84,30 @@ export function FixClient() {
   const [contextOpen, setContextOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [waitingForServer, setWaitingForServer] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
 
   const autoSubmitted = useRef(false);
+  const unmounted = useRef(false);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    unmounted.current = false;
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
+
+  // elapsed-seconds ticker while waiting for the server
+  useEffect(() => {
+    if (!waitingForServer) {
+      setElapsed(0);
+      return;
+    }
+    const t = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [waitingForServer]);
 
   // ---------------------------------------------------- existing process_id redirect
   useEffect(() => {
@@ -126,27 +161,61 @@ export function FixClient() {
 
     autoSubmitted.current = true;
     void submitNow({ github_url: githubUrl.trim() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, githubUrl]);
 
   const canSubmit =
     mode === "github" ? githubUrl.trim().length > 0 : code.trim().length > 0;
 
+  // ---------------------------------------------------- submit with retry (up to 100s)
   const submitNow = async (payload: Record<string, unknown>) => {
     setSubmitting(true);
     setError(null);
-    try {
-      const { process_id } = await api.createProcess(payload);
-      router.replace(`/fix/${process_id}`);
-    } catch (err) {
-      setSubmitting(false);
-      if (err instanceof ApiError) {
-        setError(
-          err.status === 429
-            ? "Rate limit reached. Please wait a moment before trying again."
-            : err.message
-        );
-      } else {
-        setError("Something went wrong. Please try again.");
+    const deadline = Date.now() + SERVER_WAIT_MS;
+
+    while (!unmounted.current) {
+      try {
+        const remaining = Math.max(deadline - Date.now(), 0);
+        // race the request against the remaining time so a hanging request can't exceed 100s
+        const { process_id } = await Promise.race([
+          api.createProcess(payload),
+          sleep(remaining).then((): never => {
+            throw new Error(TIMEOUT_MARKER);
+          }),
+        ]);
+        setWaitingForServer(false);
+        router.replace(`/fix/${process_id}`);
+        return;
+      } catch (err) {
+        const timedOut = err instanceof Error && err.message === TIMEOUT_MARKER;
+
+        // real (non-network) errors: show immediately
+        if (!timedOut && !isRetryable(err)) {
+          setWaitingForServer(false);
+          setSubmitting(false);
+          setError(
+            err instanceof ApiError
+              ? err.status === 429
+                ? "Rate limit reached. Please wait a moment before trying again."
+                : err.message
+              : "Something went wrong. Please try again."
+          );
+          return;
+        }
+
+        // deadline reached: give up
+        if (timedOut || Date.now() + RETRY_DELAY_MS >= deadline) {
+          setWaitingForServer(false);
+          setSubmitting(false);
+          setError(
+            `Server did not start in time (${SERVER_WAIT_SECONDS}s). The request failed — please try again in a moment.`
+          );
+          return;
+        }
+
+        // server not up yet: show queued state and retry
+        setWaitingForServer(true);
+        await sleep(RETRY_DELAY_MS);
       }
     }
   };
@@ -175,7 +244,6 @@ export function FixClient() {
     setFilename(file.name);
   };
 
-  // FIXED: Typed events correctly
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
@@ -190,12 +258,19 @@ export function FixClient() {
   const language = detectLanguage(filename);
   const contextFilled = [errorMessage, expectedBehavior, testCode].filter(Boolean).length;
 
-  if (submitting && mode === "github") {
+  // GitHub auto-submit screen (falls back to the normal page if it fails)
+  if (submitting && mode === "github" && !error) {
     return (
       <div className="max-w-xl mx-auto px-6 py-32 text-center font-mono">
         <Loader2 className="w-12 h-12 animate-spin mx-auto mb-6 text-cyan-400" />
-        <h1 className="text-xl font-bold text-white uppercase tracking-widest mb-2">FETCHING_FILE...</h1>
-        <p className="text-sm text-gray-400">Downloading from GitHub and starting analysis.</p>
+        <h1 className="text-xl font-bold text-white uppercase tracking-widest mb-2">
+          {waitingForServer ? "QUEUED..." : "FETCHING_FILE..."}
+        </h1>
+        <p className="text-sm text-gray-400">
+          {waitingForServer
+            ? `Server is starting up, hang tight… (${elapsed}s / ${SERVER_WAIT_SECONDS}s)`
+            : "Downloading from GitHub and starting analysis."}
+        </p>
       </div>
     );
   }
@@ -218,7 +293,7 @@ export function FixClient() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
         {/* Left column */}
         <div className="space-y-6">
-          
+
           {/* Mode Selector - Brutalist Tabs */}
           <div className="inline-flex items-center gap-2 p-1 border-4 border-white bg-black shadow-[6px_6px_0px_0px_#fff]">
             {([
@@ -341,7 +416,7 @@ export function FixClient() {
             </button>
             <AnimatePresence>
               {contextOpen && (
-                <motion.div 
+                <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
@@ -411,6 +486,18 @@ export function FixClient() {
               </div>
             </div>
 
+            {waitingForServer && (
+              <div className="bg-yellow-950/40 border-4 border-yellow-400 text-yellow-300 text-xs p-4 mb-6 font-bold">
+                &gt; QUEUED: Server is starting up… ({elapsed}s / {SERVER_WAIT_SECONDS}s)
+                <div className="mt-2 h-1 bg-yellow-900">
+                  <div
+                    className="h-full bg-yellow-400 transition-all"
+                    style={{ width: `${Math.min((elapsed / SERVER_WAIT_SECONDS) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             {error && (
               <div className="bg-red-950/50 border-4 border-red-500 text-red-400 text-xs p-4 mb-6 font-bold">
                 &gt; ERROR: {error}
@@ -423,7 +510,10 @@ export function FixClient() {
               className="group w-full h-14 flex items-center justify-center gap-3 bg-cyan-400 text-black font-black text-sm uppercase tracking-widest border-4 border-black shadow-[6px_6px_0px_0px_#fff] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#fff] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
-                <><Loader2 className="w-5 h-5 animate-spin" /> SUBMITTING...</>
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />{" "}
+                  {waitingForServer ? "QUEUED..." : "SUBMITTING..."}
+                </>
               ) : (
                 <>ANALYZE <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
               )}

@@ -35,7 +35,7 @@ from security.settings import get_settings
 settings = get_settings()
 
 
-# ---------------------------------------------------------------- lifespan
+# lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await RedisManager.initialize()
@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
     await RedisManager.close()
 
 
-# ---------------------------------------------------------------- app
+# app
 app = FastAPI(
     title="TestPilot AI",
     version="0.1.0",
@@ -52,7 +52,7 @@ app = FastAPI(
 )
 
 
-# ---------------------------------------------------------------- CORS
+# CORS
 _allowed_origins = (
     ["*"] if settings.APP_ENV == "development" else [settings.FRONTEND_URL]
 )
@@ -73,7 +73,7 @@ app.add_middleware(
 )
 
 
-# ---------------------------------------------------------------- RequestID
+# RequestID
 class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         rid = request.headers.get("x-request-id") or uuid.uuid4().hex
@@ -85,7 +85,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 app.add_middleware(RequestIDMiddleware)
 
 
-# ---------------------------------------------------------------- RateLimit
+# RateLimit
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """
     Applies the rate limiter to every non-OPTIONS request.
@@ -123,13 +123,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 app.add_middleware(RateLimitMiddleware)
 
 
-# ---------------------------------------------------------------- routers
+# routers
 app.include_router(health_router)
 app.include_router(processes_router)
 app.include_router(rate_limit_router)
 
 
-# ---------------------------------------------------------------- errors
+# errors
 @app.exception_handler(RateLimitExceeded)
 async def _rate_limit_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse(
