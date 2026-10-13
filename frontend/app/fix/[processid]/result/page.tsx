@@ -13,7 +13,7 @@ export async function generateMetadata({
   const { processid } = await params;
   const shortId = processid ? processid.slice(0, 8) : "Unknown";
   return {
-    title: `Result ${shortId}`,
+    title: `Result Of Code File`,
     description: "View the AI-generated diagnosis, corrected code, diff, and sandbox verification results.",
     openGraph: {
       title: `TestPilot AI — Repair Result (${shortId})`,
